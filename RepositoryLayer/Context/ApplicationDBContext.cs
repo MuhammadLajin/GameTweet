@@ -1,11 +1,6 @@
 ﻿using DomainLayer.Configuration;
 using DomainLayer.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RepositoryLayer.Context
 {
@@ -18,7 +13,6 @@ namespace RepositoryLayer.Context
         public DbSet<Reply> Reply { get; set; }
 
         #endregion
-
 
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options):base(options)
         {

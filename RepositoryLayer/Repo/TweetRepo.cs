@@ -19,6 +19,11 @@ namespace RepositoryLayer.Repo
         private DbSet<Tweet> entities;
         #endregion
 
+        /// <summary>
+        /// inject DB context and configurations
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="Context"></param>
         public TweetRepo(IConfiguration configuration, ApplicationDBContext Context)
         {
             this._configuration = configuration;
@@ -26,51 +31,87 @@ namespace RepositoryLayer.Repo
             entities = context.Set<Tweet>();
         }
 
+        /// <summary>
+        /// calling DB to get all list of tweets
+        /// return data asynchronously
+        /// </summary>
+        /// <param name="_userId"></param>
+        /// <param name="includingProperties"></param>
+        /// <returns></returns>
         public async Task<List<Tweet>> GetUserTweets(int? _userId, string includingProperties = "")
         {
             Expression<Func<Tweet, bool>> check = null;
-            if(_userId != default)
+            //case I have id
+            if (_userId != default)
             {
-                check = x => x.UserId == _userId;
+                var user = await getUserById(_userId);
+                //case user is not exist
+                if (user != null)
+                {
+                    check = x => x.UserId == _userId;
+                }
+                else
+                {
+                    return null;
+                }
             }
+
 
             return await GetAllTweets(check, includingProperties);
         }
 
-        public async Task<bool> WriteComment(Comment comment)
+        /// <summary>
+        /// calling DB to insert new valid comment
+        /// return data asynchronously
+        /// </summary>
+        /// <param name="comment"></param>
+        /// <returns></returns>
+        public async Task<CommentBaseEntity> WriteComment(Comment comment)
         {
+            comment.CreatedAt = DateTime.Now;
             context.Comment.Add(comment);
-            var changes = await context.SaveChangesAsync();
-            if (changes == 1)
-            {
-                return true;
-            }
-            return false;
+            await context.SaveChangesAsync();
+
+            return comment;
         }
 
-        public async Task<bool> WriteReply(Reply reply)
+        /// <summary>
+        /// calling DB to insert new valid reply
+        /// return data asynchronously
+        /// </summary>
+        /// <param name="reply"></param>
+        /// <returns></returns>
+        public async Task<CommentBaseEntity> WriteReply(Reply reply)
         {
+            reply.CreatedAt = DateTime.Now;
             context.Reply.Add(reply);
-            var changes = await context.SaveChangesAsync();
-            if (changes == 1)
-            {
-                return true;
-            }
-            return false;
+            await context.SaveChangesAsync();
+            addTotalReplies(reply.CommentId);
+            return reply;
         }
 
+        /// <summary>
+        /// calling DB to insert new valid tweet
+        /// return data asynchronously
+        /// </summary>
+        /// <param name="tweet"></param>
+        /// <returns></returns>
         public async Task<Tweet> WriteTweet(Tweet tweet)
         {
+            tweet.CreatedAt = DateTime.Now;
             context.Tweet.Add(tweet);
-            var changes = await context.SaveChangesAsync();
-            // await Task.FromResult(context.Tweet.AddAsync(tweet));
+            await context.SaveChangesAsync();
             return tweet;
         }
 
-
-
-
-        private async Task<List<Tweet>> GetAllTweets(Expression<Func<Tweet, bool>> filter=null, string includingProperties="")
+        #region Helper Methods
+        /// <summary>
+        /// private help method to aggregate comment and replies with it's related tweet
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <param name="includingProperties"></param>
+        /// <returns></returns>
+        private async Task<List<Tweet>> GetAllTweets(Expression<Func<Tweet, bool>> filter = null, string includingProperties = "")
         {
             IQueryable<Tweet> query = entities;
 
@@ -83,14 +124,52 @@ namespace RepositoryLayer.Repo
                 .Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
 
             return await query.ToListAsync();
+        }
 
-
-
-
-
-
+        /// <summary>
+        /// update total replies
+        /// </summary>
+        /// <param name="commentId"></param>
+        private void addTotalReplies(int commentId)
+        {
+            var comment = context.Comment.SingleOrDefault(c => c.Id== commentId);
+            if (comment != null)
+            {
+                comment.TotalReplies += 1;
+                context.SaveChanges();
+            }
 
         }
 
+
+        #endregion
+        #region check id methods
+        public async Task<User> getUserById(int? userId)
+        {
+            if (userId > 0 && userId != default)
+            {
+                return await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync();
+            }
+            return null;
+        }
+
+        public async Task<Tweet> getTweetById(int tweetId)
+        {
+            if (tweetId > 0)
+            {
+                return await context.Tweet.Where(t => t.Id == tweetId).FirstOrDefaultAsync();
+            }
+            return null;
+        }
+        public async Task<Comment> getCommentById(int commentId)
+        {
+            if (commentId > 0)
+            {
+                return await context.Comment.Where(c => c.Id == commentId).FirstOrDefaultAsync();
+            }
+            return null;
+        }
+
+        #endregion
     }
 }

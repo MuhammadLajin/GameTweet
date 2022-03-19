@@ -29,11 +29,12 @@ namespace GameTweet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //Enable Cors
+            #region Enable Cors
             services.AddCors(c =>
             {
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());               
             });
+            #endregion
 
             #region Context
             services.AddDbContext<ApplicationDBContext>(option => option.UseSqlServer(Configuration.GetConnectionString("GameTweetCon"),
@@ -46,23 +47,23 @@ namespace GameTweet
                 ));
             #endregion
 
-            //Json Serializer
+            #region Json Serializer
             services.AddControllersWithViews().AddNewtonsoftJson(options =>
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
                 .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
 
+            #endregion
+
             //addSwaggerDocument
             services.AddSwaggerDocument();
 
-
-            
             services.AddControllers();
-
 
             #region AutoMapper
             services.AddAutoMapper(typeof(TweetMapping).Assembly);
             #endregion
-            #region Repo
+
+            #region Repo AddScoped
             Type[] repositories = Assembly.Load(typeof(TweetRepo).Assembly.GetName()).GetTypes().Where(r => r.IsClass && r.Name.EndsWith("Repo") ).ToArray();
             Type[] iRepositories = Assembly.Load(typeof(ITweetRepo).Assembly.GetName()).GetTypes().Where(r =>r.IsInterface && r.Name.EndsWith("Repo")).ToArray();
             foreach (var repoInterface in iRepositories)
@@ -75,7 +76,8 @@ namespace GameTweet
             }
 
             #endregion
-            #region Services
+
+            #region Services AddScoped
             Type[] appservices = Assembly.Load(typeof(TweetService).Assembly.GetName()).GetTypes().Where(r => r.IsClass && r.Name.EndsWith("Service")).ToArray();
             Type[] iappservices = Assembly.Load(typeof(ITweetService).Assembly.GetName()).GetTypes().Where(r => r.IsInterface && r.Name.EndsWith("Service")).ToArray();
             foreach (var repoInterface in iappservices)
@@ -103,8 +105,6 @@ namespace GameTweet
 
             //Enable Cors
             app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-
-
 
             app.UseRouting();
 

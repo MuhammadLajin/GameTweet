@@ -10,8 +10,8 @@ using RepositoryLayer.Context;
 namespace GameTweet.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20220318181715_init2")]
-    partial class init2
+    [Migration("20220319161707_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,7 +23,7 @@ namespace GameTweet.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.Comment", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -47,7 +47,7 @@ namespace GameTweet.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.HasIndex("TweetId");
 
@@ -56,7 +56,7 @@ namespace GameTweet.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.Reply", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -75,7 +75,7 @@ namespace GameTweet.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.HasIndex("CommentId");
 
@@ -84,7 +84,7 @@ namespace GameTweet.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.Tweet", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -100,7 +100,7 @@ namespace GameTweet.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
@@ -109,7 +109,7 @@ namespace GameTweet.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.User", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -122,7 +122,7 @@ namespace GameTweet.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.ToTable("User");
                 });

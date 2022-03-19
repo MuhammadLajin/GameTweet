@@ -15,132 +15,108 @@ namespace ServiceLayer.Services
 
         public ITweetRepo TweetRepo { get; }
         public IMapper Mapper { get; }
+
+        /// <summary>
+        /// CTOR + dependency injection for Services and Mapper
+        /// </summary>
+        /// <param name="tweetRepo"></param>
+        /// <param name="mapper"></param>
         public TweetService(ITweetRepo tweetRepo,IMapper mapper)
         {
             TweetRepo = tweetRepo;
             Mapper = mapper;
         }
+
         /// <summary>
+        /// get all tweets filterated with optional UserId
+        /// including all comments and replies
         /// 
-        /// 
+        /// if user exist it will return list of his tweets
+        /// if user don't exist in DB it will return invalid user id
+        /// else it wil return all tweets along with it' users 
         /// </summary>
         /// <param name="_userId">optional UserId</param>
         /// <returns></returns>
         public async Task<List<TweetDto>> UserTweets(int? _userId)
         {
             #region Declare Values
-            var response = new List<TweetDto>();
-
+            List<Tweet> listOfTweets;
+            List<TweetDto> listOfTweetsResponse;
             //incuding the detail of the tweet
             string includeProperties = $"{nameof(User)},{nameof(Comment)},{nameof(Comment)}.{nameof(Reply)}";
 
             #endregion
-           
-            var currentTweets = await TweetRepo.GetUserTweets(_userId, includeProperties);
 
+            listOfTweets = await TweetRepo.GetUserTweets(_userId, includeProperties);
+
+            if(listOfTweets == null)
+            {
+                return null;
+            }
             #region AutoMapping
-            response = Mapper.Map<List<TweetDto>>(currentTweets);
+            listOfTweetsResponse = Mapper.Map<List<TweetDto>>(listOfTweets);
             #endregion
+            
+            return listOfTweetsResponse;
 
-            //#region Mapping
-            //foreach (var item in currentTweets)
-            //{
-            //    var temp = new TweetDto { Id = item.Id, UserId = item.UserId, Content = item.Content };
-            //    foreach (var com in item.Comment)
-            //    {
-            //        //add ids
-            //        var tempComment = new CommentDto
-            //        {
-            //            Id = com.Id,
-            //            TweetId = com.TweetId,
-            //            Content = com.Content,
-            //            UserId = com.UserId,
-            //            TotalReplies = com.TotalReplies
-            //        };
-            //        foreach (var reply in com.Reply)
-            //        {
-            //            var tempReply = new ReplyDto
-            //            {
-            //                Id = reply.Id,
-            //                Content = reply.Content,
-            //                CommentId = reply.CommentId,
-            //                UserId = reply.UserId
-            //            };
-            //            tempComment.Reply.Add(tempReply);
-            //        }
-            //        temp.Comment.Add(tempComment);
-            //    }
-
-            //    response.Add(temp);
-            //}
-
-            //#endregion
-
-            return response;
+            
         }
 
-        public Task<Tweet> AddTweet(CreateTweetDto tweet)
+        /// <summary>
+        /// Add tweet for user
+        /// if user exist it will add the tweet
+        /// if user don't exist in DB it will return invalid user id
+        /// </summary>
+        /// <param name="tweetDto"> createTweetDto Model</param>
+        /// <returns></returns>
+        public async Task<Tweet> AddTweet(CreateTweetDto tweetDto)
         {
-            var tempTweet = new Tweet { UserId = tweet.UserId, Content = tweet.Content, CreatedAt = DateTime.Now };
-            return (TweetRepo.WriteTweet(tempTweet));
-
+            var user = await TweetRepo.getUserById(tweetDto.UserId);
+            if (user != null)
+            {
+                Tweet createdTweet =  Mapper.Map<Tweet>(tweetDto);
+                return (await TweetRepo.WriteTweet(createdTweet));
+            }
+            return null;
         }
 
         /// <summary>
         /// add comment or reply
+        /// if user exist it will add the comment or reply
+        /// if user don't exist in DB it will return invalid user id
+        /// 
+        /// if it's a reply with non exist comment id in DB, it will return invalid comment id
         /// </summary>
-        /// <param name="tweet"></param>
+        /// <param name="tweet">create commment or reply Model</param>
         /// <returns></returns>
-        public Task<bool> AddCommentReply(CreateCommentDto comment)
+        public async Task<CommentBaseEntity> AddCommentReply(CreateCommentDto commentDto)
         {
             CommentBaseEntity commentReplyEntity;
-
-            if (comment.relatedCommentId != default)
+            var user = await TweetRepo.getUserById(commentDto.UserId);
+            
+            if (user != null)
             {
-                commentReplyEntity = new Reply
+                //comment id is exist
+                if (commentDto.CommentId != default)
                 {
-                    UserId = comment.UserId,
-                    Content = comment.Content,
-                    CreatedAt = DateTime.Now,
-                    CommentId = comment.relatedCommentId
-                };
-                return (TweetRepo.WriteReply((Reply)commentReplyEntity));
-
-
-
-                //var tempReply = new Reply
-                //{
-                //    UserId = comment.UserId,
-                //    CommentId = comment.relatedCommentId,
-                //    Content = comment.Content,
-                //    CreatedAt = DateTime.Now
-                //};
-
-                //return (TweetRepo.WriteReply(tempReply));
-            }
-            else
-            {
-                commentReplyEntity = new Comment
+                    var comment = await TweetRepo.getCommentById(commentDto.CommentId);
+                    if (comment != null)
+                    {
+                        commentReplyEntity = Mapper.Map<Reply>(commentDto);
+                        return (await TweetRepo.WriteReply((Reply)commentReplyEntity));
+                    }
+                }
+                else
                 {
-                    UserId = comment.UserId,
-                    Content = comment.Content,
-                    CreatedAt = DateTime.Now,
-                    TweetId = comment.TweetId
-                };
-                return (TweetRepo.WriteComment((Comment)commentReplyEntity));
-
-
-                //var tempComment = new Comment
-                //{
-                //    UserId = comment.UserId,
-                //    TweetId = comment.TweetId,
-                //    Content = comment.Content,
-                //    CreatedAt = DateTime.Now
-                //};
-                //return (TweetRepo.WriteComment(tempComment));
-
+                    var tweet = await TweetRepo.getTweetById(commentDto.TweetId);
+                    if (tweet != null)
+                    {
+                        commentReplyEntity = Mapper.Map<Comment>(commentDto);
+                        return (await TweetRepo.WriteComment((Comment)commentReplyEntity));
+                    }
+                }
             }
-
+            return null;
         }
     }
 }

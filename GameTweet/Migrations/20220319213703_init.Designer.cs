@@ -10,7 +10,7 @@ using RepositoryLayer.Context;
 namespace GameTweet.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20220319161707_init")]
+    [Migration("20220319213703_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,26 @@ namespace GameTweet.Migrations
                     b.HasIndex("TweetId");
 
                     b.ToTable("Comment");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Content = "comment 1 on tweet 1 from user 2",
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 625, DateTimeKind.Local).AddTicks(1486),
+                            TotalReplies = 4,
+                            TweetId = 1,
+                            UserId = 2
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Content = "comment 2 on tweet 1 from user 3",
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 625, DateTimeKind.Local).AddTicks(2974),
+                            TotalReplies = 0,
+                            TweetId = 1,
+                            UserId = 3
+                        });
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Reply", b =>
@@ -80,6 +100,40 @@ namespace GameTweet.Migrations
                     b.HasIndex("CommentId");
 
                     b.ToTable("Reply");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CommentId = 1,
+                            Content = "reply 1 on comment 1 from user 1",
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 626, DateTimeKind.Local).AddTicks(498),
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CommentId = 1,
+                            Content = "reply 2 on comment 1 from user 2",
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 626, DateTimeKind.Local).AddTicks(884),
+                            UserId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CommentId = 1,
+                            Content = "reply 3 on comment 1 from user 1",
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 626, DateTimeKind.Local).AddTicks(932),
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CommentId = 1,
+                            Content = "reply 4 on comment 1 from user 3",
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 626, DateTimeKind.Local).AddTicks(965),
+                            UserId = 3
+                        });
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Tweet", b =>
@@ -105,6 +159,29 @@ namespace GameTweet.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Tweet");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Content = "tweet 1 from user 1",
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 623, DateTimeKind.Local).AddTicks(7446),
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Content = "tweet 2 from user 2",
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 623, DateTimeKind.Local).AddTicks(7957),
+                            UserId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Content = "tweet 3 from user 3",
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 623, DateTimeKind.Local).AddTicks(8037),
+                            UserId = 3
+                        });
                 });
 
             modelBuilder.Entity("DomainLayer.Models.User", b =>
@@ -125,6 +202,26 @@ namespace GameTweet.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("User");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 618, DateTimeKind.Local).AddTicks(9207),
+                            Name = "User 1"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 622, DateTimeKind.Local).AddTicks(8311),
+                            Name = "User 2"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2022, 3, 19, 23, 37, 2, 622, DateTimeKind.Local).AddTicks(8691),
+                            Name = "User 3"
+                        });
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Comment", b =>

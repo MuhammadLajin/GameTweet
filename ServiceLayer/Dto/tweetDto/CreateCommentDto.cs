@@ -6,7 +6,7 @@ namespace ServiceLayer.Dto.tweetDto
     public class CreateCommentDto
     {
         [Required(ErrorMessage = "Required")]
-        [StringLength(80, ErrorMessage = "content length has to be between 1 to 80 character")]
+        [StringLength(60, ErrorMessage = "content length has to be between 1 to 60 character")]
         public string Content { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Id is Required")]

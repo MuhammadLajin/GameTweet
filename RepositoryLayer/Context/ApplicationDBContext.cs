@@ -22,6 +22,8 @@ namespace RepositoryLayer.Context
         protected override void OnModelCreating(ModelBuilder modelbuider)
         {
             modelbuider.ApplyConfigurationsFromAssembly(typeof(UserConfiguration).Assembly);
+            //seeding the enums
+            modelbuider.BuildEnums();
             base.OnModelCreating(modelbuider);
         }
 
